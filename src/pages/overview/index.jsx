@@ -1,4 +1,4 @@
-﻿import { FiArrowRight, FiBarChart2, FiChevronRight, FiMessageSquare, FiPlus, FiThumbsDown, FiThumbsUp } from "react-icons/fi";
+import { FiArrowRight, FiBarChart2, FiChevronRight, FiMessageSquare, FiPlus, FiThumbsDown, FiThumbsUp } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import styles from "./styles.module.css";
 import shared from "../shared.module.css";
@@ -12,6 +12,7 @@ const dayName = (date) => new Intl.DateTimeFormat("en", { weekday: "short" }).fo
 
 const Overview = ({ feedback, onSelectFeedback, onSelectTheme, onNewFeedback }) => {
   const navigate = useNavigate();
+  const dateLabel = new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(new Date());
   const positive = feedback.filter((item) => item.sentiment === "Positive").length;
   const negative = feedback.filter((item) => item.sentiment === "Negative").length;
   const waiting = feedback.filter((item) => item.status === "New" || item.status === "In review").length;
@@ -28,7 +29,7 @@ const Overview = ({ feedback, onSelectFeedback, onSelectTheme, onNewFeedback }) 
 
   return <div className={shared.page}>
     <div className={shared.pageHeading}>
-      <div><p className={shared.context}>Tuesday, October 13</p><h1>Listen closely.</h1><p className={shared.intro}>A thoughtful view of what your customers need next.</p></div>
+      <div><p className={shared.context}>{dateLabel}</p><h1>Listen closely.</h1><p className={shared.intro}>A thoughtful view of what your customers need next.</p></div>
       <div className={shared.headingActions}><button className={shared.secondaryButton} type="button" onClick={() => navigate("/inbox")}><FiMessageSquare aria-hidden="true" /> Open inbox</button><button className={shared.primaryButton} type="button" onClick={onNewFeedback}><FiPlus aria-hidden="true" /> Capture feedback</button></div>
     </div>
 
