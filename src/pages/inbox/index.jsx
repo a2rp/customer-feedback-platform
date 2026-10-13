@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FiArrowLeft, FiCheck, FiChevronDown, FiClock, FiCopy, FiEdit2, FiExternalLink, FiFilter, FiInbox, FiMessageCircle, FiMoreHorizontal, FiPlus, FiSearch, FiSend, FiTrash2 } from "react-icons/fi";
 import { feedbackStatuses, sentimentOptions } from "../../data";
 import shared from "../shared.module.css";
@@ -12,7 +12,7 @@ const timeAgo = (value) => {
 };
 const avatarClass = (color) => `${styles.avatar} ${styles[color] || styles.plum}`;
 
-const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpenFeedback, onRequestDelete, onAddNote, onNotify, searchQuery, onSearchQueryChange, selectedTheme, onNewFeedback }) => {
+const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpenFeedback, onRequestDelete, onAddNote, onNotify, searchQuery, onSearchQueryChange, selectedTheme, onSelectTheme, onNewFeedback }) => {
   const [statusFilter, setStatusFilter] = useState("All statuses");
   const [sentimentFilter, setSentimentFilter] = useState("All sentiment");
   const [sort, setSort] = useState("Newest first");
@@ -30,13 +30,12 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
       return matchesQuery && matchesStatus && matchesSentiment && matchesTheme;
     }).sort((a, b) => sort === "Oldest first" ? new Date(a.receivedAt) - new Date(b.receivedAt) : new Date(b.receivedAt) - new Date(a.receivedAt));
   }, [feedback, searchQuery, statusFilter, sentimentFilter, selectedTheme, sort]);
-  const selected = visible.find((item) => item.id === selectedId) || visible[0] || null;
+  const selected = visible.find((item) => item.id === selectedId) || visible[0] || null;`n  const noteText = selected ? noteDrafts[selected.id] ?? "" : "";`n  const replyDraft = selected ? replyDrafts[selected.id] ?? selected.responseDraft ?? "" : "";`n  const setNoteText = (value) => { if (selected) setNoteDrafts((items) => ({ ...items, [selected.id]: value })); };`n  const setReplyDraft = (value) => { if (selected) setReplyDrafts((items) => ({ ...items, [selected.id]: value })); };
 
   useEffect(() => {
     if (selected?.id && selected.id !== selectedId) onSelectFeedback(selected.id);
     if (!selected) onSelectFeedback(null);
   }, [selected, selectedId, onSelectFeedback]);
-  useEffect(() => { setReplyDraft(selected?.responseDraft || ""); setNoteText(""); }, [selected?.id, selected?.responseDraft]);
 
   const openRecord = (item) => { onSelectFeedback(item.id); setMobileDetail(true); };
   const saveNote = (event) => {
@@ -61,7 +60,7 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
       <label className={styles.filter}><FiFilter aria-hidden="true" /><select aria-label="Filter by status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option>All statuses</option>{feedbackStatuses.map((item) => <option key={item}>{item}</option>)}</select><FiChevronDown aria-hidden="true" /></label>
       <label className={styles.filter}><select aria-label="Filter by sentiment" value={sentimentFilter} onChange={(event) => setSentimentFilter(event.target.value)}><option>All sentiment</option>{sentimentOptions.map((item) => <option key={item}>{item}</option>)}</select><FiChevronDown aria-hidden="true" /></label>
       <label className={styles.filter}><FiClock aria-hidden="true" /><select aria-label="Sort feedback" value={sort} onChange={(event) => setSort(event.target.value)}><option>Newest first</option><option>Oldest first</option></select><FiChevronDown aria-hidden="true" /></label>
-      {selectedTheme ? <button className={styles.themeFilter} type="button" onClick={() => { onSelectFeedback(visible[0]?.id ?? null); onSearchQueryChange(""); }} aria-label={`Clear ${selectedTheme} theme filter`}>Theme: {selectedTheme}<span>×</span></button> : null}
+      {selectedTheme ? <button className={styles.themeFilter} type="button" onClick={() => { onSelectFeedback(visible[0]?.id ?? null); onSearchQueryChange(""); onSelectTheme(""); }} aria-label={`Clear ${selectedTheme} theme filter`}>Theme: {selectedTheme}<span>×</span></button> : null}
     </div>
 
     <div className={styles.splitPane}>
