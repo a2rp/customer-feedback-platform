@@ -16,10 +16,9 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
   const [statusFilter, setStatusFilter] = useState("All statuses");
   const [sentimentFilter, setSentimentFilter] = useState("All sentiment");
   const [sort, setSort] = useState("Newest first");
-  const [noteText, setNoteText] = useState("");
-  const [replyDraft, setReplyDraft] = useState("");
+  const [noteDrafts, setNoteDrafts] = useState({});
+  const [replyDrafts, setReplyDrafts] = useState({});
   const [mobileDetail, setMobileDetail] = useState(false);
-
   const visible = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return [...feedback].filter((item) => {
@@ -35,30 +34,25 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
   const replyDraft = selected ? replyDrafts[selected.id] ?? selected.responseDraft ?? "" : "";
   const setNoteText = (value) => { if (selected) setNoteDrafts((items) => ({ ...items, [selected.id]: value })); };
   const setReplyDraft = (value) => { if (selected) setReplyDrafts((items) => ({ ...items, [selected.id]: value })); };
-  const noteText = selected ? noteDrafts[selected.id] ?? "" : "";
-  const replyDraft = selected ? replyDrafts[selected.id] ?? selected.responseDraft ?? "" : "";
-  const setNoteText = (value) => { if (selected) setNoteDrafts((items) => ({ ...items, [selected.id]: value })); };
-  const setReplyDraft = (value) => { if (selected) setReplyDrafts((items) => ({ ...items, [selected.id]: value })); };
 
   useEffect(() => {
-    if (selected?.id && selected.id !== selectedId) onSelectFeedback(selected.id);
-    if (!selected) onSelectFeedback(null);
-  }, [selected, selectedId, onSelectFeedback]);
+    if (visible.length && !visible.some((item) => item.id === selectedId)) onSelectFeedback(visible[0].id);
+    if (!visible.length && selectedId) onSelectFeedback(null);
+  }, [visible, selectedId, onSelectFeedback]);
 
   const openRecord = (item) => { onSelectFeedback(item.id); setMobileDetail(true); };
   const saveNote = (event) => {
     event.preventDefault();
-    if (onAddNote(selected.id, noteText)) setNoteText("");
+    if (selected && onAddNote(selected.id, noteText)) setNoteText("");
   };
-  const saveReply = () => onUpdateFeedback(selected.id, { responseDraft: replyDraft }, "Reply draft saved.");
+  const saveReply = () => { if (selected) onUpdateFeedback(selected.id, { responseDraft: replyDraft }, "Reply draft saved."); };
   const copyReply = async () => {
     if (!replyDraft.trim()) { onNotify("Write a reply before copying it.", "error"); return; }
     try { await navigator.clipboard.writeText(replyDraft); onNotify("Reply copied to your clipboard."); }
     catch { onNotify("Clipboard access is unavailable in this browser.", "error"); }
   };
 
-  return <div className={shared.page}>
-    <div className={styles.pageHeading}>
+  return <div className={shared.page}>    <div className={styles.pageHeading}>
       <div><p className={shared.context}>Customer voice</p><h1>Feedback inbox</h1><p className={shared.intro}>Read the full note, add context, and move each conversation forward.</p></div>
       <button className={shared.primaryButton} type="button" onClick={onNewFeedback}><FiPlus aria-hidden="true" /> Add feedback</button>
     </div>
@@ -68,7 +62,7 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
       <label className={styles.filter}><FiFilter aria-hidden="true" /><select aria-label="Filter by status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option>All statuses</option>{feedbackStatuses.map((item) => <option key={item}>{item}</option>)}</select><FiChevronDown aria-hidden="true" /></label>
       <label className={styles.filter}><select aria-label="Filter by sentiment" value={sentimentFilter} onChange={(event) => setSentimentFilter(event.target.value)}><option>All sentiment</option>{sentimentOptions.map((item) => <option key={item}>{item}</option>)}</select><FiChevronDown aria-hidden="true" /></label>
       <label className={styles.filter}><FiClock aria-hidden="true" /><select aria-label="Sort feedback" value={sort} onChange={(event) => setSort(event.target.value)}><option>Newest first</option><option>Oldest first</option></select><FiChevronDown aria-hidden="true" /></label>
-      {selectedTheme ? <button className={styles.themeFilter} type="button" onClick={() => { onSelectFeedback(visible[0]?.id ?? null); onSearchQueryChange(""); onSelectTheme(""); }} aria-label={`Clear ${selectedTheme} theme filter`}>Theme: {selectedTheme}<span>×</span></button> : null}
+      {selectedTheme ? <button className={styles.themeFilter} type="button" onClick={() => { onSelectFeedback(visible[0]?.id ?? null); onSearchQueryChange(""); onSelectTheme(""); onSelectTheme(""); }} aria-label={`Clear ${selectedTheme} theme filter`}>Theme: {selectedTheme}<span>×</span></button> : null}
     </div>
 
     <div className={styles.splitPane}>
