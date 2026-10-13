@@ -64,11 +64,9 @@ const App = () => {
   const confirmDelete = () => {
     if (!deleteTarget) return;
     const removedId = deleteTarget.id;
-    setFeedback((items) => {
-      const next = items.filter((item) => item.id !== removedId);
-      if (selectedId === removedId) setSelectedId(next[0]?.id ?? null);
-      return next;
-    });
+    const next = feedback.filter((item) => item.id !== removedId);
+    setFeedback(next);
+    if (selectedId === removedId) setSelectedId(next[0]?.id ?? null);
     setDeleteTarget(null);
     notify("Feedback removed from this demo session.");
   };
@@ -86,6 +84,7 @@ const App = () => {
   const pageProps = {
     feedback,
     selectedId,
+    onNewFeedback: openNew,
     onSelectFeedback: setSelectedId,
     onUpdateFeedback: updateFeedback,
     onOpenFeedback: openEdit,
@@ -110,4 +109,5 @@ const App = () => {
 };
 
 export default App;
+
 
