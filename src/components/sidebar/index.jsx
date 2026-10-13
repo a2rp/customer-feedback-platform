@@ -1,4 +1,4 @@
-﻿import { NavLink } from "react-router-dom";
+﻿import { Link, NavLink } from "react-router-dom";
 import { FiBarChart2, FiGrid, FiInbox, FiMessageCircle, FiTag } from "react-icons/fi";
 import styles from "./styles.module.css";
 
@@ -10,7 +10,7 @@ const Sidebar = ({ newCount, feedbackCount }) => {
   ];
 
   return <aside className={styles.sidebar} aria-label="Workspace navigation">
-    <a className={styles.brand} href="#/overview" aria-label="Sonder overview"><span className={styles.mark}><FiMessageCircle aria-hidden="true" /></span><span><strong>sonder</strong><small>customer voice</small></span></a>
+    <Link className={styles.brand} to="/overview" aria-label="Sonder overview"><span className={styles.mark}><FiMessageCircle aria-hidden="true" /></span><span><strong>sonder</strong><small>customer voice</small></span></a>
     <div className={styles.sectionLabel}>WORKSPACE</div>
     <nav className={styles.nav}>
       {links.map(({ to, label, Icon, badge }) => <NavLink key={to} to={to} className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ""}`}>
@@ -25,3 +25,4 @@ const Sidebar = ({ newCount, feedbackCount }) => {
 };
 
 export default Sidebar;
+
