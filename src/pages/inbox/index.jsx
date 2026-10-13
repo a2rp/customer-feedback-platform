@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FiArrowLeft, FiCheck, FiChevronDown, FiClock, FiCopy, FiEdit2, FiExternalLink, FiFilter, FiInbox, FiMessageCircle, FiMoreHorizontal, FiPlus, FiSearch, FiSend, FiTrash2 } from "react-icons/fi";
+import { FiArrowLeft, FiCheck, FiChevronDown, FiClock, FiCopy, FiEdit2, FiExternalLink, FiFilter, FiInbox, FiMessageCircle, FiPlus, FiSearch, FiSend, FiTrash2 } from "react-icons/fi";
 import { feedbackStatuses, sentimentOptions } from "../../data";
 import shared from "../shared.module.css";
 import styles from "./styles.module.css";
@@ -75,7 +75,7 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
 
       <section className={`${styles.detailPane} ${mobileDetail ? styles.mobileVisible : ""}`} aria-label="Selected feedback detail">
         {selected ? <>
-          <div className={styles.detailHeader}><button className={styles.backButton} type="button" onClick={() => setMobileDetail(false)}><FiArrowLeft aria-hidden="true" /> Back to inbox</button><div className={styles.detailActions}><button type="button" onClick={() => onOpenFeedback(selected)} aria-label="Edit feedback"><FiEdit2 aria-hidden="true" /></button><button className={styles.deleteButton} type="button" onClick={() => onRequestDelete(selected)} aria-label="Delete feedback"><FiTrash2 aria-hidden="true" /></button><button type="button" aria-label="More feedback options" onClick={() => onNotify("This feedback is already available in your workspace.")}><FiMoreHorizontal aria-hidden="true" /></button></div></div>
+          <div className={styles.detailHeader}><button className={styles.backButton} type="button" onClick={() => setMobileDetail(false)}><FiArrowLeft aria-hidden="true" /> Back to inbox</button><div className={styles.detailActions}><button type="button" onClick={() => onOpenFeedback(selected)} aria-label="Edit feedback"><FiEdit2 aria-hidden="true" /></button><button className={styles.deleteButton} type="button" onClick={() => onRequestDelete(selected)} aria-label="Delete feedback"><FiTrash2 aria-hidden="true" /></button></div></div>
           <div className={styles.detailBody}>
             <div className={styles.recordMeta}><span>{selected.id}</span><span className={styles.metaDot}>·</span><span>{selected.channel}</span><span className={styles.metaDot}>·</span><time>{timeAgo(selected.receivedAt)}</time></div>
             <h2>{selected.title}</h2>
