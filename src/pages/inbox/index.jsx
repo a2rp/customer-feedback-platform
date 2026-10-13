@@ -30,7 +30,15 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
       return matchesQuery && matchesStatus && matchesSentiment && matchesTheme;
     }).sort((a, b) => sort === "Oldest first" ? new Date(a.receivedAt) - new Date(b.receivedAt) : new Date(b.receivedAt) - new Date(a.receivedAt));
   }, [feedback, searchQuery, statusFilter, sentimentFilter, selectedTheme, sort]);
-  const selected = visible.find((item) => item.id === selectedId) || visible[0] || null;`n  const noteText = selected ? noteDrafts[selected.id] ?? "" : "";`n  const replyDraft = selected ? replyDrafts[selected.id] ?? selected.responseDraft ?? "" : "";`n  const setNoteText = (value) => { if (selected) setNoteDrafts((items) => ({ ...items, [selected.id]: value })); };`n  const setReplyDraft = (value) => { if (selected) setReplyDrafts((items) => ({ ...items, [selected.id]: value })); };
+  const selected = visible.find((item) => item.id === selectedId) || visible[0] || null;
+  const noteText = selected ? noteDrafts[selected.id] ?? "" : "";
+  const replyDraft = selected ? replyDrafts[selected.id] ?? selected.responseDraft ?? "" : "";
+  const setNoteText = (value) => { if (selected) setNoteDrafts((items) => ({ ...items, [selected.id]: value })); };
+  const setReplyDraft = (value) => { if (selected) setReplyDrafts((items) => ({ ...items, [selected.id]: value })); };
+  const noteText = selected ? noteDrafts[selected.id] ?? "" : "";
+  const replyDraft = selected ? replyDrafts[selected.id] ?? selected.responseDraft ?? "" : "";
+  const setNoteText = (value) => { if (selected) setNoteDrafts((items) => ({ ...items, [selected.id]: value })); };
+  const setReplyDraft = (value) => { if (selected) setReplyDrafts((items) => ({ ...items, [selected.id]: value })); };
 
   useEffect(() => {
     if (selected?.id && selected.id !== selectedId) onSelectFeedback(selected.id);
