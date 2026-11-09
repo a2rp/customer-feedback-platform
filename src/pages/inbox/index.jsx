@@ -12,7 +12,7 @@ const timeAgo = (value) => {
 };
 const avatarClass = (color) => `${styles.avatar} ${styles[color] || styles.plum}`;
 
-const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpenFeedback, onRequestDelete, onAddNote, onNotify, searchQuery, onSearchQueryChange, selectedTheme, onSelectTheme, onNewFeedback }) => {
+const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpenFeedback, onRequestDelete, onAddNote, onNotify, searchQuery, onSearchQueryChange, selectedTheme, onSelectTheme, riskOnly, onClearRiskFilter, onNewFeedback }) => {
   const [statusFilter, setStatusFilter] = useState("All statuses");
   const [sentimentFilter, setSentimentFilter] = useState("All sentiment");
   const [sort, setSort] = useState("Newest first");
@@ -26,9 +26,10 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
       const matchesStatus = statusFilter === "All statuses" || item.status === statusFilter;
       const matchesSentiment = sentimentFilter === "All sentiment" || item.sentiment === sentimentFilter;
       const matchesTheme = !selectedTheme || item.tags.includes(selectedTheme);
-      return matchesQuery && matchesStatus && matchesSentiment && matchesTheme;
+      const matchesRisk = !riskOnly || (item.sentiment === "Negative" && item.status !== "Resolved");
+      return matchesQuery && matchesStatus && matchesSentiment && matchesTheme && matchesRisk;
     }).sort((a, b) => sort === "Oldest first" ? new Date(a.receivedAt) - new Date(b.receivedAt) : new Date(b.receivedAt) - new Date(a.receivedAt));
-  }, [feedback, searchQuery, statusFilter, sentimentFilter, selectedTheme, sort]);
+  }, [feedback, searchQuery, statusFilter, sentimentFilter, selectedTheme, riskOnly, sort]);
   const selected = visible.find((item) => item.id === selectedId) || visible[0] || null;
   const noteText = selected ? noteDrafts[selected.id] ?? "" : "";
   const replyDraft = selected ? replyDrafts[selected.id] ?? selected.responseDraft ?? "" : "";
@@ -63,6 +64,7 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
       <label className={styles.filter}><select aria-label="Filter by sentiment" value={sentimentFilter} onChange={(event) => setSentimentFilter(event.target.value)}><option>All sentiment</option>{sentimentOptions.map((item) => <option key={item}>{item}</option>)}</select><FiChevronDown aria-hidden="true" /></label>
       <label className={styles.filter}><FiClock aria-hidden="true" /><select aria-label="Sort feedback" value={sort} onChange={(event) => setSort(event.target.value)}><option>Newest first</option><option>Oldest first</option></select><FiChevronDown aria-hidden="true" /></label>
       {selectedTheme ? <button className={styles.themeFilter} type="button" onClick={() => { onSelectFeedback(visible[0]?.id ?? null); onSearchQueryChange(""); onSelectTheme(""); }} aria-label={`Clear ${selectedTheme} theme filter`}>Theme: {selectedTheme}<span>×</span></button> : null}
+      {riskOnly ? <button className={styles.themeFilter} type="button" onClick={onClearRiskFilter}>Unresolved negative<span>×</span></button> : null}
     </div>
 
     <div className={styles.splitPane}>
@@ -70,7 +72,7 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
         <div className={styles.listHeader}><div><strong>{visible.length} {visible.length === 1 ? "note" : "notes"}</strong><span>{selectedTheme ? `about ${selectedTheme}` : "in this inbox"}</span></div><button type="button" aria-label="Add feedback" onClick={onNewFeedback}><FiPlus aria-hidden="true" /></button></div>
         {visible.length ? <div className={styles.listScroll}>{visible.map((item) => <button type="button" key={item.id} className={`${styles.feedbackItem} ${selected?.id === item.id ? styles.selectedItem : ""}`} onClick={() => openRecord(item)} aria-pressed={selected?.id === item.id}>
           <span className={avatarClass(item.color)}>{item.initials}</span><span className={styles.itemContent}><span className={styles.itemTop}><strong>{item.name}</strong><time>{timeAgo(item.receivedAt)}</time></span><span className={styles.itemCompany}>{item.company}</span><span className={styles.itemTitle}>{item.title}</span><span className={styles.itemBottom}><span className={`${styles.sentiment} ${styles[item.sentiment.toLowerCase()]}`}>{item.sentiment}</span><span>{item.channel}</span><span className={`${styles.statusDot} ${styles[item.status.toLowerCase().replace(" ", "")]}`}>{item.status}</span></span></span>
-        </button>)}</div> : <div className={styles.empty}><span><FiInbox aria-hidden="true" /></span><strong>No feedback matches</strong><p>Try another search or clear a filter.</p><button type="button" onClick={() => { onSearchQueryChange(""); onSelectTheme(""); setStatusFilter("All statuses"); setSentimentFilter("All sentiment"); }}>Clear filters</button></div>}
+        </button>)}</div> : <div className={styles.empty}><span><FiInbox aria-hidden="true" /></span><strong>No feedback matches</strong><p>Try another search or clear a filter.</p><button type="button" onClick={() => { onSearchQueryChange(""); onSelectTheme(""); onClearRiskFilter(); setStatusFilter("All statuses"); setSentimentFilter("All sentiment"); }}>Clear filters</button></div>}
       </section>
 
       <section className={`${styles.detailPane} ${mobileDetail ? styles.mobileVisible : ""}`} aria-label="Selected feedback detail">
@@ -85,9 +87,9 @@ const Inbox = ({ feedback, selectedId, onSelectFeedback, onUpdateFeedback, onOpe
             <div className={styles.tagSection}><strong>Product themes</strong><div>{selected.tags.length ? selected.tags.map((tag) => <button className={styles.tag} key={tag} type="button" onClick={() => onSelectTheme(tag)}>{tag}</button>) : <span className={styles.noTags}>No themes assigned yet</span>}</div></div>
             <section className={styles.notesSection}><div className={styles.sectionTitle}><h3>Team notes</h3><span>{selected.notes.length}</span></div>
               {selected.notes.length ? <div className={styles.notesList}>{selected.notes.map((note) => <article className={styles.note} key={note.id}><span className={styles.noteAvatar}>ST</span><div><strong>Studio team <time>{timeAgo(note.createdAt)}</time></strong><p>{note.text}</p></div></article>)}</div> : <p className={styles.noNotes}>Keep private context here so your team has the full picture.</p>}
-              <form className={styles.noteForm} onSubmit={saveNote}><textarea aria-label="Add an internal note" value={noteText} onChange={(event) => setNoteText(event.target.value)} placeholder="Add an internal note..." rows="2" /><button type="submit" aria-label="Add team note"><FiSend aria-hidden="true" /></button></form>
+              <form className={styles.noteForm} onSubmit={saveNote}><textarea aria-label="Add an internal note" value={noteText} maxLength="2000" onChange={(event) => setNoteText(event.target.value)} placeholder="Add an internal note..." rows="2" /><button type="submit" aria-label="Add team note"><FiSend aria-hidden="true" /></button></form>
             </section>
-            <section className={styles.replySection}><div className={styles.sectionTitle}><div><h3>Reply draft</h3><p>This stays a draft in the frontend demo.</p></div><span><FiCheck aria-hidden="true" /> Private</span></div><textarea aria-label="Draft a customer reply" value={replyDraft} onChange={(event) => setReplyDraft(event.target.value)} placeholder="Write a thoughtful response..." rows="3" /><div className={styles.replyActions}><button type="button" className={styles.copyButton} onClick={copyReply}><FiCopy aria-hidden="true" /> Copy draft</button><button type="button" className={styles.saveButton} onClick={saveReply}>Save draft</button></div></section>
+            <section className={styles.replySection}><div className={styles.sectionTitle}><div><h3>Reply draft</h3><p>This stays a draft in the frontend demo.</p></div><span><FiCheck aria-hidden="true" /> Private</span></div><textarea aria-label="Draft a customer reply" value={replyDraft} maxLength="5000" onChange={(event) => setReplyDraft(event.target.value)} placeholder="Write a thoughtful response..." rows="3" /><div className={styles.replyActions}><button type="button" className={styles.copyButton} onClick={copyReply}><FiCopy aria-hidden="true" /> Copy draft</button><button type="button" className={styles.saveButton} onClick={saveReply}>Save draft</button></div></section>
           </div>
         </> : <div className={styles.detailEmpty}><span><FiInbox aria-hidden="true" /></span><h2>Select a customer note</h2><p>Choose a conversation to see its full story and add team context.</p></div>}
       </section>

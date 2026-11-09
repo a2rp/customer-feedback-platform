@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import shared from "../shared.module.css";
 import styles from "./styles.module.css";
 
-const Insights = ({ feedback, onSelectFeedback, onSelectTheme }) => {
+const Insights = ({ feedback, onSelectFeedback, onSelectTheme, onOpenRisks }) => {
   const navigate = useNavigate();
   const sentiments = ["Positive", "Neutral", "Negative"];
   const colors = { Positive: styles.positive, Neutral: styles.neutral, Negative: styles.negative };
@@ -47,7 +47,7 @@ const Insights = ({ feedback, onSelectFeedback, onSelectTheme }) => {
       <section className={`${styles.analysisCard} ${styles.riskCard}`}><div className={styles.cardHeading}><div><h2>Follow up with care</h2><p>Unresolved negative feedback</p></div><span className={styles.riskCount}>{risks.length}</span></div>
         <div className={styles.riskList}>{risks.slice(0, 3).map((item) => <button type="button" className={styles.riskRow} key={item.id} onClick={() => openFeedback(item)}><span className={styles.riskSignal} /><span><strong>{item.title}</strong><small>{item.name} · {item.company}</small></span><FiArrowRight aria-hidden="true" /></button>)}</div>
         {risks.length === 0 ? <div className={styles.allClear}><span>✓</span><strong>Nothing waiting for a response</strong><p>New negative feedback will appear here.</p></div> : null}
-        {risks.length > 3 ? <button className={styles.viewMore} type="button" onClick={() => { onSelectTheme(""); navigate("/inbox"); }}>See all {risks.length} notes <FiArrowRight aria-hidden="true" /></button> : null}
+        {risks.length > 3 ? <button className={styles.viewMore} type="button" onClick={onOpenRisks}>See all {risks.length} unresolved notes <FiArrowRight aria-hidden="true" /></button> : null}
       </section>
     </div>
     <p className={styles.disclaimer}>Insights update from the feedback in this browser session. They are not shared across devices.</p>

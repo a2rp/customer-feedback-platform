@@ -23,6 +23,7 @@ const App = () => {
   const [searchValue, setSearchValue] = useState("");
   const [inboxQuery, setInboxQuery] = useState("");
   const [selectedTheme, setSelectedTheme] = useState("");
+  const [riskOnly, setRiskOnly] = useState(false);
 
   useEffect(() => { window.scrollTo(0, 0); }, [location.pathname]);
 
@@ -45,6 +46,7 @@ const App = () => {
       setSelectedId(record.id);
       setInboxQuery("");
       setSelectedTheme("");
+      setRiskOnly(false);
       notify("Feedback added to the inbox.");
       navigate("/inbox");
     }
@@ -56,7 +58,7 @@ const App = () => {
   };
   const addNote = (id, text) => {
     if (!text.trim()) { notify("Write a note before adding it.", "error"); return false; }
-    const note = { id: `N-${Date.now()}`, text: text.trim(), createdAt: new Date().toISOString() };
+    const note = { id: `N-${Date.now()}-${Math.random().toString(16).slice(2)}`, text: text.trim(), createdAt: new Date().toISOString() };
     setFeedback((items) => items.map((item) => item.id === id ? { ...item, notes: [...item.notes, note] } : item));
     notify("Internal note added.");
     return true;
@@ -73,11 +75,19 @@ const App = () => {
   const submitSearch = (query) => {
     setInboxQuery(query);
     setSelectedTheme("");
+    setRiskOnly(false);
     navigate("/inbox");
   };
   const selectTheme = (theme) => {
     setSelectedTheme(theme);
     setInboxQuery("");
+    setRiskOnly(false);
+    navigate("/inbox");
+  };
+  const openRisks = () => {
+    setInboxQuery("");
+    setSelectedTheme("");
+    setRiskOnly(true);
     navigate("/inbox");
   };
 
@@ -95,13 +105,16 @@ const App = () => {
     onSearchQueryChange: setInboxQuery,
     selectedTheme,
     onSelectTheme: selectTheme,
+    riskOnly,
+    onOpenRisks: openRisks,
+    onClearRiskFilter: () => setRiskOnly(false),
   };
   const title = pageTitles[location.pathname] || "Workspace";
 
   return <div className={styles.app}>
     <Sidebar newCount={feedback.filter((item) => item.status === "New").length} feedbackCount={feedback.length} />
     <Header pageTitle={title} searchValue={searchValue} onSearchChange={setSearchValue} onSearch={submitSearch} onAdd={openNew} />
-    <main className={styles.main} id="main-content"><AppRoutes pageProps={pageProps} /><Footer /></main>
+    <main className={styles.main} id="main-content" tabIndex="-1"><AppRoutes pageProps={pageProps} /><Footer /></main>
     {dialog ? <FeedbackForm initialValues={dialog.type === "edit" ? dialog.record : null} onClose={() => setDialog(null)} onSave={saveFeedback} /> : null}
     {deleteTarget ? <ConfirmationDialog itemName={deleteTarget.title} onCancel={() => setDeleteTarget(null)} onConfirm={confirmDelete} /> : null}
     <Toast items={notices} onDismiss={dismissToast} />
